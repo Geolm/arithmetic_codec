@@ -1,11 +1,13 @@
 # Arithmetic Codec
 Arithmetic encoder/decoder, ported in C from Amir Said's FastAC.
 
+
 Because my compression projects are written in C and the initial C++ implementation was not using any advanced c++ feature.
+
+You can find the orginal source code of FastAC here : https://github.com/richgel999/FastAC
 
 
 # License
-
 
 From the code:
 ```C
