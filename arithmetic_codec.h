@@ -3,7 +3,6 @@
 
 // Ported in C from on FastAC by Amir Said's
 // https://github.com/richgel999/FastAC
-// only data models are ported right now
 
 #ifdef __cplusplus
 extern "C" {
