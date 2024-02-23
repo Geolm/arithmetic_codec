@@ -1,10 +1,19 @@
 # Arithmetic Codec
 Arithmetic encoder/decoder, ported in C from Amir Said's FastAC.
 
+It's one header file library, put those line in a cpp/c file.
 
-Because my compression projects are written in C and the initial C++ implementation was not using any advanced c++ feature.
+````C
 
-You can find the orginal source code of FastAC here : https://github.com/richgel999/FastAC
+#define __ARITHMETIC_CODEC__IMPLEMENTATION__
+#include "../arithmetic_codec.h"
+
+````
+
+
+
+### Unit tests build status (Linux/MacOs/Windows)
+[![Build Status](https://github.com/geolm/arithmetic_codec/actions/workflows/build.yml/badge.svg)](https://github.com/geolm/arithmetic_codec/actions)
 
 
 # License
