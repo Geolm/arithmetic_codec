@@ -34,7 +34,7 @@ TEST adaptive_model(void)
     for(uint32_t i=0; i<num_elements; ++i)
     {
         uint32_t value = ac_decode_adaptive(codec, model);
-        ASSERT_EQ(value, data[i]);
+        ASSERT_EQ_FMT(value, data[i], "%d");
     }
 
     ac_stop_decoder(codec);
