@@ -12,7 +12,6 @@ struct adaptive_data_model;
 struct static_data_model;
 struct arithmetic_codec;
 
-
 //----------------------------------------------------------------------------------------------------------------------
 // Adaptive data model
 //----------------------------------------------------------------------------------------------------------------------
@@ -32,11 +31,9 @@ void adaptive_data_model_set_alphabet(struct adaptive_data_model* model, unsigne
 // Return how many time the symbol has been encoded
 unsigned int adaptive_data_model_get_symbol_count(const struct adaptive_data_model* model, unsigned int symbol);
 
-
 //----------------------------------------------------------------------------------------------------------------------
 // Static data model
 //----------------------------------------------------------------------------------------------------------------------
-
 
 // Initialize the static data model, returns a pointer to the model
 //      number_of_symbols   Number of symbols maximum
@@ -120,17 +117,11 @@ void ac_terminate(struct arithmetic_codec* codec);
 
 #include <assert.h>
 
-#ifndef AC_FREE
+#if !defined(AC_FREE) && !defined(AC_ALLOC)
 #include <stdlib.h>
 #define AC_FREE(a) free(a)
-#endif
-
-#ifndef AC_ALLOC
-#include <stdlib.h>
 #define AC_ALLOC(a) malloc(a)
 #endif
-
-
 
 //-- constants --------------------------------------------------------------------------------------------------------------------
 #define AC__MinLength (0x01000000U)         // threshold for renormalization
