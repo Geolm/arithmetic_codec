@@ -24,7 +24,7 @@ TEST adaptive_model(void)
     uint32_t compressed_size = ac_stop_encoder(codec);
     uint8_t* compressed_buffer = ac_get_buffer(codec);
 
-    printf("adaptive_model\n uncompressed size : %lu\n compressed buffer size : %d\n ratio : %f\n", sizeof(data), compressed_size, ((float)sizeof(data)) / (float)compressed_size);
+    printf("adaptive_model\n uncompressed size : %zu\n compressed buffer size : %d\n ratio : %f\n", sizeof(data), compressed_size, ((float)sizeof(data)) / (float)compressed_size);
 
     ac_set_buffer(codec, compressed_size, compressed_buffer);
     ac_start_decoder(codec);
