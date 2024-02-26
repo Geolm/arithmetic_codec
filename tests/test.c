@@ -10,7 +10,7 @@ enum {num_elements = 20};
 
 TEST adaptive_model(void)
 {
-    struct adaptive_data_model* model = adaptive_data_model_init(16);
+    struct adaptive_model* model = adaptive_model_init(16);
     struct arithmetic_codec* codec = ac_init();
 
     const uint32_t data[num_elements] = {0, 0, 15, 15, 15, 15, 3, 3, 2, 1, 15, 15, 15, 15, 15, 0, 0, 0, 8, 3};
@@ -37,7 +37,7 @@ TEST adaptive_model(void)
     ac_set_buffer(codec, compressed_size, compressed_buffer);
     ac_start_decoder(codec);
 
-    adaptive_data_model_reset(model);
+    adaptive_model_reset(model);
 
     for(uint32_t i=0; i<num_elements; ++i)
     {
@@ -47,7 +47,7 @@ TEST adaptive_model(void)
 
     ac_stop_decoder(codec);
     ac_terminate(codec);
-    adaptive_data_model_terminate(model);
+    adaptive_model_terminate(model);
 
     PASS();
 }

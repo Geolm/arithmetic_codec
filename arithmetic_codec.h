@@ -10,8 +10,8 @@ extern "C" {
 
 #include <stdint.h>
 
-struct adaptive_data_model;
-struct static_data_model;
+struct adaptive_model;
+struct static_model;
 struct arithmetic_codec;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -19,19 +19,19 @@ struct arithmetic_codec;
 //----------------------------------------------------------------------------------------------------------------------
 
 // Initialize the adaptive data model, returns a pointer to the model
-struct adaptive_data_model* adaptive_data_model_init(uint32_t number_of_symbols);
+struct adaptive_model* adaptive_model_init(uint32_t number_of_symbols);
 
 // Release memory
-void adaptive_data_model_terminate(struct adaptive_data_model* model);
+void adaptive_model_terminate(struct adaptive_model* model);
 
 // Reset the statistics of the model (all symbols counter resetted to one)
-void adaptive_data_model_reset(struct adaptive_data_model* model);
+void adaptive_model_reset(struct adaptive_model* model);
 
 // Change the number of symbols of the model. It will reset the model
-void adaptive_data_model_set_alphabet(struct adaptive_data_model* model, uint32_t number_of_symbols);
+void adaptive_model_set_alphabet(struct adaptive_model* model, uint32_t number_of_symbols);
 
 // Return how many time the symbol has been encoded
-uint32_t adaptive_data_model_get_symbol_count(const struct adaptive_data_model* model, uint32_t symbol);
+uint32_t adaptive_model_get_symbol_count(const struct adaptive_model* model, uint32_t symbol);
 
 //----------------------------------------------------------------------------------------------------------------------
 // Static data model
@@ -41,18 +41,18 @@ uint32_t adaptive_data_model_get_symbol_count(const struct adaptive_data_model* 
 //      number_of_symbols   Number of symbols maximum
 //      probability         Pointer to an array of float containing probability. Array must have the size of number_of_symbols
 //                          Each float must be [0;1]
-struct static_data_model* static_data_model_init(uint32_t number_of_symbols, const float *probability);
+struct static_model* static_model_init(uint32_t number_of_symbols, const float *probability);
 
 
 // Set up the distribution
 //      number_of_symbols   Number of symbols maximum
 //      probability         Pointer to an array of float containing probability. Array must have the size of number_of_symbols
 //                          Each float must be [0;1]
-void static_data_model_set_distribution(struct static_data_model* model, uint32_t number_of_symbols, const float *probability);
+void static_model_set_distribution(struct static_model* model, uint32_t number_of_symbols, const float *probability);
 
 
 // Release memory
-void static_data_model_terminate(struct static_data_model* model);
+void static_model_terminate(struct static_model* model);
 
 //----------------------------------------------------------------------------------------------------------------------
 // Arithmetic Codec
@@ -87,16 +87,16 @@ void ac_put_bits(struct arithmetic_codec* codec, uint32_t data, uint32_t number_
 uint32_t ac_get_bits(struct arithmetic_codec* codec, uint32_t number_of_bits);
 
 // Encode data using an adaptive model, the model should be initialized
-void ac_encode_adaptive(struct arithmetic_codec* codec, uint32_t data, struct adaptive_data_model* model);
+void ac_encode_adaptive(struct arithmetic_codec* codec, uint32_t data, struct adaptive_model* model);
 
 // Decode the next data from the buffer using an adaptative model
-uint32_t ac_decode_adaptive(struct arithmetic_codec* codec, struct adaptive_data_model* model);
+uint32_t ac_decode_adaptive(struct arithmetic_codec* codec, struct adaptive_model* model);
 
 // Encode data using an static model, the model should be initialized
-void ac_encode_static(struct arithmetic_codec* codec, uint32_t data, struct static_data_model* model);
+void ac_encode_static(struct arithmetic_codec* codec, uint32_t data, struct static_model* model);
 
 // Decode the next data from the buffer using an static model
-uint32_t ac_decode_static(struct arithmetic_codec* codec, struct static_data_model* model);
+uint32_t ac_decode_static(struct arithmetic_codec* codec, struct static_model* model);
 
 // Return a pointer to the compressed buffer
 uint8_t* ac_get_buffer(struct arithmetic_codec* codec);
@@ -138,37 +138,37 @@ void ac_terminate(struct arithmetic_codec* codec);
 // Adaptive data model
 //----------------------------------------------------------------------------------------------------------------------
 
-struct adaptive_data_model
+struct adaptive_model
 {
     uint32_t *distribution, *symbol_count, *decoder_table;
     uint32_t total_count, update_cycle, symbols_until_update;
     uint32_t data_symbols, last_symbol, table_size, table_shift;
 };
 
-void adaptive_data_model_update(struct adaptive_data_model* model, int from_encoder);
+void adaptive_model_update(struct adaptive_model* model, int from_encoder);
 
 //----------------------------------------------------------------------------------------------------------------------
-struct adaptive_data_model* adaptive_data_model_init(uint32_t number_of_symbols)
+struct adaptive_model* adaptive_model_init(uint32_t number_of_symbols)
 {
-    struct adaptive_data_model* model = (struct adaptive_data_model*) AC_ALLOC(sizeof(struct adaptive_data_model));
+    struct adaptive_model* model = (struct adaptive_model*) AC_ALLOC(sizeof(struct adaptive_model));
 
     model->data_symbols = 0;
     model->distribution = NULL;
 
-    adaptive_data_model_set_alphabet(model, number_of_symbols);
+    adaptive_model_set_alphabet(model, number_of_symbols);
     
     return model;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void adaptive_data_model_terminate(struct adaptive_data_model* model)
+void adaptive_model_terminate(struct adaptive_model* model)
 {
     AC_FREE(model->distribution);
     AC_FREE(model);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void adaptive_data_model_reset(struct adaptive_data_model* model)
+void adaptive_model_reset(struct adaptive_model* model)
 {
     if (model->data_symbols == 0) 
         return;
@@ -180,12 +180,12 @@ void adaptive_data_model_reset(struct adaptive_data_model* model)
     for (uint32_t k = 0; k < model->data_symbols; k++) 
         model->symbol_count[k] = 1;
 
-    adaptive_data_model_update(model, 0);
+    adaptive_model_update(model, 0);
     model->symbols_until_update = model->update_cycle = (model->data_symbols + 6) >> 1;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void adaptive_data_model_set_alphabet(struct adaptive_data_model* model, uint32_t number_of_symbols)
+void adaptive_model_set_alphabet(struct adaptive_model* model, uint32_t number_of_symbols)
 {
     assert(number_of_symbols>1 && (number_of_symbols <= (1 << 11))); // invalid number of data symbols
 
@@ -219,11 +219,11 @@ void adaptive_data_model_set_alphabet(struct adaptive_data_model* model, uint32_
     }
 
     // initialize model
-    adaptive_data_model_reset(model);
+    adaptive_model_reset(model);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void adaptive_data_model_update(struct adaptive_data_model* model, int from_encoder)
+void adaptive_model_update(struct adaptive_model* model, int from_encoder)
 {
     if ((model->total_count += model->update_cycle) > DM__MaxCount) 
     {
@@ -266,7 +266,7 @@ void adaptive_data_model_update(struct adaptive_data_model* model, int from_enco
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-uint32_t adaptive_data_model_get_symbol_count(const struct adaptive_data_model* model, uint32_t symbol)
+uint32_t adaptive_model_get_symbol_count(const struct adaptive_model* model, uint32_t symbol)
 {
     assert(symbol < model->data_symbols); // invalid data symbols
     assert(model->distribution != NULL); // adaptive model should be initialized
@@ -278,27 +278,27 @@ uint32_t adaptive_data_model_get_symbol_count(const struct adaptive_data_model* 
 // Static data model
 //----------------------------------------------------------------------------------------------------------------------
 
-struct static_data_model
+struct static_model
 {
     uint32_t *distribution, *decoder_table;
     uint32_t data_symbols, last_symbol, table_size, table_shift;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
-struct static_data_model* static_data_model_init(uint32_t number_of_symbols, const float *probability)
+struct static_model* static_model_init(uint32_t number_of_symbols, const float *probability)
 {
-    struct static_data_model* model = (struct static_data_model*) AC_ALLOC(sizeof(struct static_data_model));
+    struct static_model* model = (struct static_model*) AC_ALLOC(sizeof(struct static_model));
 
     model->data_symbols = 0;
     model->distribution = NULL;
 
-    static_data_model_set_distribution(model, number_of_symbols, probability);
+    static_model_set_distribution(model, number_of_symbols, probability);
 
     return model;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void static_data_model_set_distribution(struct static_data_model* model, uint32_t number_of_symbols, const float *probability)
+void static_model_set_distribution(struct static_model* model, uint32_t number_of_symbols, const float *probability)
 {
     assert(number_of_symbols>1 && (number_of_symbols <= (1 << 11))); // invalid number of data symbols
 
@@ -360,7 +360,7 @@ void static_data_model_set_distribution(struct static_data_model* model, uint32_
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void static_data_model_terminate(struct static_data_model* model)
+void static_model_terminate(struct static_model* model)
 {
     AC_FREE(model->distribution);
     AC_FREE(model);
@@ -574,7 +574,7 @@ uint32_t ac_get_bits(struct arithmetic_codec* codec, uint32_t number_of_bits)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void ac_encode_adaptive(struct arithmetic_codec* codec, uint32_t data, struct adaptive_data_model* model)
+void ac_encode_adaptive(struct arithmetic_codec* codec, uint32_t data, struct adaptive_model* model)
 {
     assert(codec->mode == 1);  // encoder not initialized
     assert(data < model->data_symbols); // invalid data symbols
@@ -605,13 +605,13 @@ void ac_encode_adaptive(struct arithmetic_codec* codec, uint32_t data, struct ad
 
     ++model->symbol_count[data];
     if (--model->symbols_until_update == 0)
-        adaptive_data_model_update(model, 1);
+        adaptive_model_update(model, 1);
         
 
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-uint32_t ac_decode_adaptive(struct arithmetic_codec* codec, struct adaptive_data_model* model)
+uint32_t ac_decode_adaptive(struct arithmetic_codec* codec, struct adaptive_model* model)
 {
     assert(codec->mode == 2); // decoder not initialized
     assert(model->distribution != NULL); // adaptive model should be initialized
@@ -672,13 +672,13 @@ uint32_t ac_decode_adaptive(struct arithmetic_codec* codec, struct adaptive_data
 
     ++model->symbol_count[s];
     if (--model->symbols_until_update == 0) 
-        adaptive_data_model_update(model, 0);
+        adaptive_model_update(model, 0);
 
     return s;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void ac_encode_static(struct arithmetic_codec* codec, uint32_t data, struct static_data_model* model)
+void ac_encode_static(struct arithmetic_codec* codec, uint32_t data, struct static_model* model)
 {
     assert(codec->mode == 1);   // encoder not initialized
     assert(data < model->data_symbols); // invalid data symbol
@@ -707,7 +707,7 @@ void ac_encode_static(struct arithmetic_codec* codec, uint32_t data, struct stat
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-uint32_t ac_decode_static(struct arithmetic_codec* codec, struct static_data_model* model)
+uint32_t ac_decode_static(struct arithmetic_codec* codec, struct static_model* model)
 {
     assert(codec->mode == 2);  // decoder not initialized
 
