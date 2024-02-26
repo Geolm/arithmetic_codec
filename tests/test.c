@@ -15,8 +15,9 @@ TEST adaptive_model(void)
 
     const uint32_t data[num_elements] = {0, 0, 15, 15, 15, 15, 3, 3, 2, 1, 15, 15, 15, 15, 15, 0, 0, 0, 8, 3};
     const uint8_t reference_compressed_data[9] = {0x0, 0xff, 0xf7,0x33, 0x28, 0x66, 0xe6, 0x3, 0x1f};
+    uint8_t buffer[256];
 
-    ac_set_buffer(codec, 1000, NULL);
+    ac_set_buffer(codec, 256, (uint8_t*)buffer);
     ac_start_encoder(codec);
 
     for(uint32_t i=0; i<num_elements; ++i)
@@ -26,8 +27,6 @@ TEST adaptive_model(void)
 
     uint32_t compressed_size = ac_stop_encoder(codec);
     uint8_t* compressed_buffer = ac_get_buffer(codec);
-
-    printf("adaptive_model\n uncompressed size : %zu\n compressed buffer size : %d\n ratio : %f\n", sizeof(data), compressed_size, ((float)sizeof(data)) / (float)compressed_size);
 
     ASSERT_EQ(9, compressed_size);
 
