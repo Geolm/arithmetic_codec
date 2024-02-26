@@ -20,11 +20,8 @@ TEST adaptive_model(void)
 
     for(uint32_t i=0; i<num_elements; ++i)
     {
-        printf("%d ", data[i]);
         ac_encode_adaptive(codec, data[i], model);
     }
-
-    printf("\n");
 
     uint32_t compressed_size = ac_stop_encoder(codec);
     uint8_t* compressed_buffer = ac_get_buffer(codec);
@@ -38,14 +35,8 @@ TEST adaptive_model(void)
 
     for(uint32_t i=0; i<num_elements; ++i)
     {
-        printf("%d ", data[i]);
-    }
-
-    for(uint32_t i=0; i<num_elements; ++i)
-    {
-        printf("%d\n", i);
         uint32_t value = ac_decode_adaptive(codec, model);
-        ASSERT_EQ_FMT(value, data[i], "%d");
+        ASSERT_EQ_FMT(data[i], value, "%d");
     }
 
     ac_stop_decoder(codec);
