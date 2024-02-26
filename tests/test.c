@@ -33,6 +33,7 @@ TEST adaptive_model(void)
 
     for(uint32_t i=0; i<num_elements; ++i)
     {
+        printf("%d\n", i);
         uint32_t value = ac_decode_adaptive(codec, model);
         ASSERT_EQ_FMT(value, data[i], "%d");
     }
