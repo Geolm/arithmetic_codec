@@ -14,6 +14,7 @@ TEST adaptive_model(void)
     struct arithmetic_codec* codec = ac_init();
 
     const uint32_t data[num_elements] = {0, 0, 15, 15, 15, 15, 3, 3, 2, 1, 15, 15, 15, 15, 15, 0, 0, 0, 8, 3};
+    const uint8_t reference_compressed_data[9] = {0x0, 0xff, 0xf7,0x33, 0x28, 0x66, 0xe6, 0x3, 0x1f};
 
     ac_set_buffer(codec, 1000, NULL);
     ac_start_encoder(codec);
@@ -27,6 +28,12 @@ TEST adaptive_model(void)
     uint8_t* compressed_buffer = ac_get_buffer(codec);
 
     printf("adaptive_model\n uncompressed size : %zu\n compressed buffer size : %d\n ratio : %f\n", sizeof(data), compressed_size, ((float)sizeof(data)) / (float)compressed_size);
+
+    ASSERT_EQ(9, compressed_size);
+
+    for(uint32_t i=0; i<compressed_size; ++i)
+        ASSERT_EQ_FMT(reference_compressed_data[i], compressed_buffer[i], "%x");
+        
 
     ac_set_buffer(codec, compressed_size, compressed_buffer);
     ac_start_decoder(codec);
