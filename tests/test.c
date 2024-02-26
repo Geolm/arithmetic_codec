@@ -13,13 +13,18 @@ TEST adaptive_model(void)
     struct adaptive_data_model* model = adaptive_data_model_init(16);
     struct arithmetic_codec* codec = ac_init();
 
-    uint32_t data[num_elements] = {0, 0, 15, 15, 15, 15, 3, 3, 2, 1, 15, 15, 15, 15, 15, 0, 0, 0, 8, 3};
+    const uint32_t data[num_elements] = {0, 0, 15, 15, 15, 15, 3, 3, 2, 1, 15, 15, 15, 15, 15, 0, 0, 0, 8, 3};
 
     ac_set_buffer(codec, 1000, NULL);
     ac_start_encoder(codec);
 
     for(uint32_t i=0; i<num_elements; ++i)
+    {
+        printf("%d ", data[i]);
         ac_encode_adaptive(codec, data[i], model);
+    }
+
+    printf("\n");
 
     uint32_t compressed_size = ac_stop_encoder(codec);
     uint8_t* compressed_buffer = ac_get_buffer(codec);

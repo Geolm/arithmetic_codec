@@ -66,7 +66,7 @@ struct arithmetic_codec* ac_init(void);
 // Set the buffer for compressed data
 //      max_code_bytes  Maximum size of the buffer in bytes
 //      user_buffer     If the pointer to the buffer is NULL, memory will be allocated internally using malloc()
-void ac_set_buffer(struct arithmetic_codec* codec, uint32_t max_code_bytes, unsigned char *user_buffer);
+void ac_set_buffer(struct arithmetic_codec* codec, uint32_t max_code_bytes, uint8_t *user_buffer);
 
 // Set the codec to encoding mode
 void ac_start_encoder(struct arithmetic_codec* codec);
@@ -99,7 +99,7 @@ void ac_encode_static(struct arithmetic_codec* codec, uint32_t data, struct stat
 uint32_t ac_decode_static(struct arithmetic_codec* codec, struct static_data_model* model);
 
 // Return a pointer to the compressed buffer
-unsigned char* ac_get_buffer(struct arithmetic_codec* codec);
+uint8_t* ac_get_buffer(struct arithmetic_codec* codec);
 
 // Return a pointer to the compressed buffer
 void ac_terminate(struct arithmetic_codec* codec);
@@ -372,7 +372,7 @@ void static_data_model_terminate(struct static_data_model* model)
 
 struct arithmetic_codec
 {
-    unsigned char *code_buffer, *new_buffer, *ac_pointer;
+    uint8_t *code_buffer, *new_buffer, *ac_pointer;
     uint32_t base, value, length;                     // arithmetic coding state
     uint32_t buffer_size;
     uint32_t mode;     // mode: 0 = undef, 1 = encoder, 2 = decoder
@@ -381,7 +381,7 @@ struct arithmetic_codec
 //----------------------------------------------------------------------------------------------------------------------
 inline static void ac_propagate_carry(struct arithmetic_codec* codec)
 {
-    unsigned char * p;            
+    uint8_t * p;            
     // carry propagation on compressed data buffer
     for (p = codec->ac_pointer - 1; *p == 0xFFU; p--) 
         *p = 0;
@@ -393,7 +393,7 @@ inline static void ac_renorm_enc_interval(struct arithmetic_codec* codec)
 {
     do  // output and discard top byte
     {
-        *codec->ac_pointer++ = (unsigned char)(codec->base >> 24);
+        *codec->ac_pointer++ = (uint8_t)(codec->base >> 24);
         codec->base <<= 8;
     } while ((codec->length <<= 8) < AC__MinLength);        // length multiplied by 256
 }
@@ -419,7 +419,7 @@ struct arithmetic_codec* ac_init(void)
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void ac_set_buffer(struct arithmetic_codec* codec, uint32_t max_code_bytes, unsigned char *user_buffer)
+void ac_set_buffer(struct arithmetic_codec* codec, uint32_t max_code_bytes, uint8_t *user_buffer)
 {
     assert(codec->mode == 0); // cannot set buffer while encoding or decoding
 
@@ -439,7 +439,7 @@ void ac_set_buffer(struct arithmetic_codec* codec, uint32_t max_code_bytes, unsi
 
     codec->buffer_size = max_code_bytes; // assign new memory
     AC_FREE(codec->new_buffer);    // free anything previously assigned
-    codec->new_buffer = (unsigned char*) AC_ALLOC(codec->buffer_size + 16); // 16 extra bytes
+    codec->new_buffer = (uint8_t*) AC_ALLOC(codec->buffer_size + 16); // 16 extra bytes
     assert(codec->new_buffer != NULL);
     codec->code_buffer = codec->new_buffer; // set buffer for compressed data
 }
@@ -772,7 +772,7 @@ uint32_t ac_decode_static(struct arithmetic_codec* codec, struct static_data_mod
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-unsigned char* ac_get_buffer(struct arithmetic_codec* codec)
+uint8_t* ac_get_buffer(struct arithmetic_codec* codec)
 {
     return codec->code_buffer;
 }
